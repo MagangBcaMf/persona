@@ -23,19 +23,19 @@ void initState() {
   super.initState();
   
 
-  selectedEvents = {
+  // selectedEvents = {
 
-      DateTime(2024, 2, 29): [
-        Event(
-          title: 'Presentation',
-          time: '09:00:00',
-          location: 'Office',
-          reminder: 'Reminder 3',
-          notes: 'Present new product',
-          date: DateTime(2024, 2, 29),
-        ),
-      ],
-    };
+  //     DateTime(2024, 2, 29): [
+  //       Event(
+  //         title: 'Presentation',
+  //         time: '09:00:00',
+  //         location: 'Office',
+  //         reminder: 'Reminder 3',
+  //         notes: 'Present new product',
+  //         date: DateTime(2024, 2, 29),
+  //       ),
+  //     ],
+  //   };
 
     initializeSelectedEvents();
 }
@@ -56,6 +56,7 @@ Future<Map<DateTime, List<Event>>> get() async {
   final response = await http.get(Uri.parse('http://10.10.6.35/api_pesona/api.php'));
 
   if (response.statusCode == 200) {
+    print('2');
     final data = json.decode(response.body);
 
     for (var item in data) {
@@ -102,7 +103,12 @@ Future<Map<DateTime, List<Event>>> get() async {
 
 
   List<Event> _getEventsfromDay(DateTime date) {
-    return selectedEvents[date] ?? [];
+    bool isToday = isSameDay(DateTime.now().toLocal(), date);
+    if (isToday) {
+      return selectedEvents[date] ?? [];
+    } else {
+      return [];
+    }
   }
 
   @override
@@ -165,16 +171,45 @@ Future<Map<DateTime, List<Event>>> get() async {
       ],
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("personA"),
-        centerTitle: true,
-        backgroundColor: Color(0xff7da0ca),
+  
+  Widget isian(){
+    return SingleChildScrollView(
+      child: Column(
+        children: selectedEvents.entries.map((entry) {
+          final date = entry.key;
+          final events = entry.value;
+          focusedDay = DateTime(focusedDay.year, focusedDay.month, focusedDay.day, 0,0,0);
+          String focus_day = focusedDay.toString().replaceAll("Z", "");
+          final date_key = date.toString();
+          DateTime date_now = DateTime.now().toLocal();
+          date_now = DateTime(date_now.year, date_now.month, date_now.day, 0, 0, 0);
+          String dateNow = date_now.toString();
+          print('focused day : $focus_day');
+          print('Datekey day : $date_key');
+          print('DateNow day : $date_now');
+          print('DateNow day : $dateNow');
+          
+          //focus day itu selected Day.
+          if(date_now == date && date_now == focus_day){
+            return EventListWidget(events: events);
+            
+          }else {
+            if(focus_day == date_key){
+              print('2');
+              return EventListWidget(events: events);
+            }
+            else{
+              return SizedBox();
+            }
+          }
+          
+        }).toList(),
       ),
-      body: Column(
+    );
+  }
+
+  Widget content(){
+    return Column(
         children: [
           TableCalendar(
             focusedDay: selectedDay,
@@ -247,16 +282,25 @@ Future<Map<DateTime, List<Event>>> get() async {
             color: Colors.grey,
           ),
           SizedBox(height: 20),
-          Column(
-            children: selectedEvents.entries.map((entry) {
-              final date = entry.key;
-              final events = entry.value;
-              final focus_day = focusedDay.toString().replaceAll("Z", "");
-              final date_now = date.toString();
-
-              return EventListWidget(events: events);
-            }).toList(),
-          ),
+          
+        ],
+      );
+  }
+  Future<void> _buildContent() async {
+    await content();
+  }
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("personA"),
+        centerTitle: true,
+        backgroundColor: Color(0xff7da0ca),
+      ),
+      body: Column (
+        children:[
+          content(),
+          isian()
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

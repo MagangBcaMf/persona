@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:persona/screens/add_event_screen.dart';
 
 class EventListWidget extends StatelessWidget {
@@ -22,6 +23,14 @@ class EventWidget extends StatelessWidget {
 
   const EventWidget({Key? key, required this.event}) : super(key: key);
 
+  timeSignature(String babi){
+     DateTime objekWaktu = DateFormat('HH:mm:ss').parse(babi);
+
+    // Format objek waktu sesuai dengan format yang diinginkan
+    String stringHasil = DateFormat('HH:mm').format(objekWaktu);
+    return stringHasil;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -40,7 +49,7 @@ class EventWidget extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Time: ${event.time}'),
+            Text('Time: ${timeSignature(event.time)}'),
             Text('Location: ${event.location}'),
             Text('Reminder: ${event.reminder}'),
             Text('Notes: ${event.notes}'),

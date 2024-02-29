@@ -2,25 +2,63 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:persona/model/model.dart';
 import 'package:crypto/crypto.dart';
+class Event {
+  String title;
+  String time;
+  String location;
+  String reminder;
+  String notes;
+  DateTime date;
 
+  Event({
+    required this.title,
+    required this.time,
+    required this.location,
+    required this.reminder,
+    required this.notes,
+    required this.date,
+  });
+}
 class Repository {
-  final baseUrl = 'https://10.10.12.47/persona-api-pub/Bmia/log';
+  final baseUrl = 'http://10.10.6.35/api_pesona/api.php';
 
-  Future<List<Approval>> getData() async {
-    final response = await http.get(Uri.parse(baseUrl));
+  Future<List<Event>> get() async {
+    try{
+      final response = await http.get(Uri.parse(baseUrl));
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
+      if (response.statusCode == 200) {
+        print('2');
+        final data = json.decode(response.body);
+        List<Event> events = [];
+        for (var item in data) {
+          DateTime temp_date = DateTime.parse(item['eventDate']);
 
-      List<Approval> approvals =
-          data.map((json) => Approval.fromJson(json)).toList();
-      print(response.body);
-      return approvals;
-    } else {
-      throw Exception('Failed to load data');
+          DateTime eventDate = DateTime(
+                  temp_date.year,
+                  temp_date.month,
+                  temp_date.day,
+          );
+          
+          Event newEvent = Event(
+            title: item['title'],
+            time: item['time'],
+            location: item['location'],
+            reminder: item['reminder'],
+            notes: item['notes'],
+            date: eventDate,
+          );
+          events.add(newEvent);
+        }
+        return events;
+      }else {
+        throw Exception('Failed to load events');
+      }
+    }
+    catch (e) {
+      print('Error: $e');
+      return []; // Return an empty list in case of an error
     }
   }
-
   // Future getData() async {
   //   try {
   //     final response = await http.get(Uri.parse(baseUrl));
