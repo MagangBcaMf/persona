@@ -21,7 +21,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
 void initState() {
   super.initState();
-  initializeSelectedEvents();
+  
+
+  selectedEvents = {
+
+      DateTime(2024, 2, 29): [
+        Event(
+          title: 'Presentation',
+          time: '09:00:00',
+          location: 'Office',
+          reminder: 'Reminder 3',
+          notes: 'Present new product',
+          date: DateTime(2024, 2, 29),
+        ),
+      ],
+    };
+
+    initializeSelectedEvents();
 }
 
 Future<void> initializeSelectedEvents() async {
@@ -238,11 +254,7 @@ Future<Map<DateTime, List<Event>>> get() async {
               final focus_day = focusedDay.toString().replaceAll("Z", "");
               final date_now = date.toString();
 
-              if (focus_day == date_now) {
-                return EventListWidget(events: events);
-              } else {
-                return SizedBox();
-              }
+              return EventListWidget(events: events);
             }).toList(),
           ),
         ],
