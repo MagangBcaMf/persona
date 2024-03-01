@@ -122,43 +122,46 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget isian() {
-    return Expanded(
+  return Expanded(
+    child: SingleChildScrollView(
       child: SingleChildScrollView(
-        child: SingleChildScrollView(
-          child: Column(
-            children: selectedEvents.entries.map((entry) {
-              final date = entry.key;
-              final events = entry.value;
-              focusedDay = DateTime(
-                  focusedDay.year, focusedDay.month, focusedDay.day, 0, 0, 0);
-              String focus_day = focusedDay.toString().replaceAll("Z", "");
-              final date_key = date.toString();
-              DateTime date_now = DateTime.now().toLocal();
-              date_now = DateTime(
-                  date_now.year, date_now.month, date_now.day, 0, 0, 0);
-              String dateNow = date_now.toString();
-              print('focused day : $focus_day');
-              print('Datekey day : $date_key');
-              print('DateNow day : $date_now');
-              print('DateNow day : $dateNow');
+        child: Column(
+          children: selectedEvents.entries.map((entry) {
+            final date = entry.key;
+            final events = entry.value;
 
+            // Sort events by time
+            events.sort((a, b) => a.time.compareTo(b.time));
 
-              if (date_now == date && date_now == focus_day) {
+            focusedDay = DateTime(
+                focusedDay.year, focusedDay.month, focusedDay.day, 0, 0, 0);
+            String focus_day = focusedDay.toString().replaceAll("Z", "");
+            final date_key = date.toString();
+            DateTime date_now = DateTime.now().toLocal();
+            date_now = DateTime(
+                date_now.year, date_now.month, date_now.day, 0, 0, 0);
+            String dateNow = date_now.toString();
+            print('focused day : $focus_day');
+            print('Datekey day : $date_key');
+            print('DateNow day : $date_now');
+            print('DateNow day : $dateNow');
+
+            if (date_now == date && date_now == focus_day) {
+              return EventListWidget(events: events);
+            } else {
+              if (focus_day == date_key) {
+                print('2');
                 return EventListWidget(events: events);
               } else {
-                if (focus_day == date_key) {
-                  print('2');
-                  return EventListWidget(events: events);
-                } else {
-                  return SizedBox();
-                }
+                return SizedBox();
               }
-            }).toList(),
-          ),
+            }
+          }).toList(),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget content() {
     return Column(
