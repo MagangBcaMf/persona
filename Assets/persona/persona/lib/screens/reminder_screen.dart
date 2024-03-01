@@ -20,26 +20,25 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime focusedDay = DateTime.now();
   TextEditingController _eventController = TextEditingController();
 
-void initState() {
-  super.initState();
-  
+  void initState() {
+    super.initState();
 
-  // selectedEvents = {
+    // selectedEvents = {
 
-  //     DateTime(2024, 2, 29): [
-  //       Event(
-  //         title: 'Presentation',
-  //         time: '09:00:00',
-  //         location: 'Office',
-  //         reminder: 'Reminder 3',
-  //         notes: 'Present new product',
-  //         date: DateTime(2024, 2, 29),
-  //       ),
-  //     ],
-  //   };
+    //     DateTime(2024, 2, 29): [
+    //       Event(
+    //         title: 'Presentation',
+    //         time: '09:00:00',
+    //         location: 'Office',
+    //         reminder: 'Reminder 3',
+    //         notes: 'Present new product',
+    //         date: DateTime(2024, 2, 29),
+    //       ),
+    //     ],
+    //   };
 
     initializeSelectedEvents();
-}
+  }
 
   Future<void> initializeSelectedEvents() async {
     try {
@@ -49,7 +48,6 @@ void initState() {
       });
     } catch (e) {
       print('Error initializing selectedEvents: $e');
-      // Handle the error gracefully
     }
   }
 
@@ -122,136 +120,135 @@ void initState() {
       ],
     );
   }
-  
-  Widget isian(){
-    return SingleChildScrollView(
-      child: Column(
-        children: selectedEvents.entries.map((entry) {
-          final date = entry.key;
-          final events = entry.value;
-          focusedDay = DateTime(focusedDay.year, focusedDay.month, focusedDay.day, 0,0,0);
-          String focus_day = focusedDay.toString().replaceAll("Z", "");
-          final date_key = date.toString();
-          DateTime date_now = DateTime.now().toLocal();
-          date_now = DateTime(date_now.year, date_now.month, date_now.day, 0, 0, 0);
-          String dateNow = date_now.toString();
-          print('focused day : $focus_day');
-          print('Datekey day : $date_key');
-          print('DateNow day : $date_now');
-          print('DateNow day : $dateNow');
-          
-          //focus day itu selected Day.
-          if(date_now == date && date_now == focus_day){
-            return EventListWidget(events: events);
-            
-          }else {
-            if(focus_day == date_key){
-              print('2');
-              return EventListWidget(events: events);
-            }
-            else{
-              return SizedBox();
-            }
-          }
-          
-        }).toList(),
+
+  Widget isian() {
+    return Expanded(
+      child: SingleChildScrollView(
+        child: SingleChildScrollView(
+          child: Column(
+            children: selectedEvents.entries.map((entry) {
+              final date = entry.key;
+              final events = entry.value;
+              focusedDay = DateTime(
+                  focusedDay.year, focusedDay.month, focusedDay.day, 0, 0, 0);
+              String focus_day = focusedDay.toString().replaceAll("Z", "");
+              final date_key = date.toString();
+              DateTime date_now = DateTime.now().toLocal();
+              date_now = DateTime(
+                  date_now.year, date_now.month, date_now.day, 0, 0, 0);
+              String dateNow = date_now.toString();
+              print('focused day : $focus_day');
+              print('Datekey day : $date_key');
+              print('DateNow day : $date_now');
+              print('DateNow day : $dateNow');
+
+
+              if (date_now == date && date_now == focus_day) {
+                return EventListWidget(events: events);
+              } else {
+                if (focus_day == date_key) {
+                  print('2');
+                  return EventListWidget(events: events);
+                } else {
+                  return SizedBox();
+                }
+              }
+            }).toList(),
+          ),
+        ),
       ),
     );
   }
 
-  Widget content(){
+  Widget content() {
     return Column(
-        children: [
-          TableCalendar(
-            focusedDay: selectedDay,
-            firstDay: DateTime(1990),
-            lastDay: DateTime(2050),
-            calendarFormat: format,
-            startingDayOfWeek: StartingDayOfWeek.sunday,
-            daysOfWeekVisible: true,
-            onDaySelected: (DateTime selectDay, DateTime focusDay) {
-              setState(() {
-                selectedDay = selectDay;
-                focusedDay = focusDay;
-              });
-            },
-            selectedDayPredicate: (DateTime date) {
-              DateTime now = DateTime.now();
-              bool isToday = isSameDay(now, date); // Check if the date is today
+      children: [
+        TableCalendar(
+          focusedDay: selectedDay,
+          firstDay: DateTime(1990),
+          lastDay: DateTime(2050),
+          calendarFormat: format,
+          startingDayOfWeek: StartingDayOfWeek.sunday,
+          daysOfWeekVisible: true,
+          onDaySelected: (DateTime selectDay, DateTime focusDay) {
+            setState(() {
+              selectedDay = selectDay;
+              focusedDay = focusDay;
+            });
+          },
+          selectedDayPredicate: (DateTime date) {
+            DateTime now = DateTime.now();
+            bool isToday = isSameDay(now, date); 
 
-              if (isToday) {
-                return false; // Skip checking events for today
-              }
+            if (isToday) {
+              return false; 
+            }
 
-              bool hasEvents = selectedEvents.keys
-                  .any((eventDate) => isSameDay(eventDate, date));
-              bool isSelectedDay = isSameDay(selectedDay, date);
+            bool hasEvents = selectedEvents.keys
+                .any((eventDate) => isSameDay(eventDate, date));
+            bool isSelectedDay = isSameDay(selectedDay, date);
 
-              return hasEvents || isSelectedDay;
-            },
-            eventLoader: _getEventsfromDay,
-            calendarStyle: CalendarStyle(
-              isTodayHighlighted: true,
-              selectedDecoration: BoxDecoration(
-                color: Color(0xff7da0ca),
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              selectedTextStyle: TextStyle(color: Colors.white),
-              todayDecoration: BoxDecoration(
-                color: Colors.lightBlueAccent,
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              defaultDecoration: BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              weekendDecoration: BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              //warna hari weekend
-              weekendTextStyle: TextStyle(
-                color: Colors.red,
-              ),
+            return hasEvents || isSelectedDay;
+          },
+          eventLoader: _getEventsfromDay,
+          calendarStyle: CalendarStyle(
+            isTodayHighlighted: true,
+            selectedDecoration: BoxDecoration(
+              color: Color(0xff7da0ca),
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(5.0),
             ),
-            headerStyle: HeaderStyle(
-              formatButtonVisible: true,
-              titleCentered: true,
-              formatButtonShowsNext: false,
-              formatButtonDecoration: BoxDecoration(
-                color: Color(0xff7da0ca),
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              formatButtonTextStyle: TextStyle(
-                color: Colors.white,
-              ),
+            selectedTextStyle: TextStyle(color: Colors.white),
+            todayDecoration: BoxDecoration(
+              color: Colors.lightBlueAccent,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            defaultDecoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            weekendDecoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            //warna hari weekend
+            weekendTextStyle: TextStyle(
+              color: Colors.red,
             ),
           ),
-          Divider(
-            thickness: 1,
-            color: Colors.grey,
+          headerStyle: HeaderStyle(
+            formatButtonVisible: true,
+            titleCentered: true,
+            formatButtonShowsNext: false,
+            formatButtonDecoration: BoxDecoration(
+              color: Color(0xff7da0ca),
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            formatButtonTextStyle: TextStyle(
+              color: Colors.white,
+            ),
           ),
-          SizedBox(height: 20),
-          
-        ],
-      );
+        ),
+        Divider(
+          thickness: 1,
+          color: Colors.grey,
+        ),
+        SizedBox(height: 20),
+      ],
+    );
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("personA"),
         centerTitle: true,
         backgroundColor: Color(0xff7da0ca),
       ),
-      body: Column (
-        children:[
-          content(),
-          isian()
-        ],
+      body: Column(
+        children: [content(), isian()],
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Color(0xff7da0ca),
