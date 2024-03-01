@@ -19,26 +19,26 @@ class Event {
     required this.date,
   });
 }
-class Repository {
-  final baseUrl = 'http://10.10.6.35/api_pesona/api.php';
 
-  Future<List<Event>> get() async {
-    try{
+class Repository {
+  static const String baseUrl = 'http://10.10.6.19/api_pesona/api.php';
+  static Future<Map<DateTime, List<Event>>> fetchEvents() async {
+    try {
       final response = await http.get(Uri.parse(baseUrl));
 
       if (response.statusCode == 200) {
-        print('2');
-        final data = json.decode(response.body);
-        List<Event> events = [];
-        for (var item in data) {
-          DateTime temp_date = DateTime.parse(item['eventDate']);
+        Map<DateTime, List<Event>> events = {};
 
+        final data = json.decode(response.body);
+
+        for (var item in data) {
+          DateTime tempDate = DateTime.parse(item['eventDate']);
           DateTime eventDate = DateTime(
-                  temp_date.year,
-                  temp_date.month,
-                  temp_date.day,
+            tempDate.year,
+            tempDate.month,
+            tempDate.day,
           );
-          
+
           Event newEvent = Event(
             title: item['title'],
             time: item['time'],
@@ -47,16 +47,30 @@ class Repository {
             notes: item['notes'],
             date: eventDate,
           );
-          events.add(newEvent);
+
+          if (events.containsKey(eventDate)) {
+            bool eventExists = events[eventDate]!.any((event) =>
+                event.time == newEvent.time &&
+                event.title == newEvent.title &&
+                event.location == newEvent.location &&
+                event.reminder == newEvent.reminder &&
+                event.notes == newEvent.notes);
+
+            if (!eventExists) {
+              events[eventDate]!.add(newEvent);
+            }
+          } else {
+            events[eventDate] = [newEvent];
+          }
         }
+
         return events;
-      }else {
-        throw Exception('Failed to load events');
+      } else {
+        throw Exception('Failed to fetch events');
       }
-    }
-    catch (e) {
-      print('Error: $e');
-      return []; // Return an empty list in case of an error
+    } catch (e) {
+      print('Error fetching events: $e');
+      rethrow; // Rethrow the exception to handle it in the calling code
     }
   }
   // Future getData() async {
@@ -98,30 +112,14 @@ class Repository {
   // }
   // }
 
-  Future<List<dynamic>> postUserData() async {
-    print('postUserData called');
-    final uri = Uri.parse(baseUrl);
+  Future<void> addEvent(Map<String, String> data) async {
+    final response = await http.post(Uri.parse(baseUrl), body: data);
 
-    final Map<String, dynamic> requestBody = {
-      'username': 'ichsan.surya',
-      'password': 'P@ssw0rd',
-      'signature': '5ca156437db03ceb85e802ada0d861a93f22971e',
-    };
-    final response = await http.post(
-      uri,
-      body: jsonEncode(requestBody),
-      headers: {'Content-Type': 'application/json'},
-    );
     if (response.statusCode == 200) {
-      print('POST request successful ${response.statusCode}');
-      print('Response : ${response.body}');
-      return jsonDecode(response.body);
+      print('Event successfully added!');
     } else {
-      print('POST request failed with status: ${response.statusCode}');
-      print('Error message: ${response.body}');
+      print('Failed to add event. Please try again.');
     }
-    print('postUserData completed');
-    throw Exception('Error');
   }
 }
 

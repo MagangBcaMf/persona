@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:persona/screens/add_event_screen.dart';
+import 'package:persona/repository/repository.dart';
 
 class EventListWidget extends StatelessWidget {
   final List<Event> events;

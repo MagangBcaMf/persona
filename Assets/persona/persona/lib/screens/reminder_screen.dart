@@ -6,6 +6,7 @@ import 'package:persona/screens/add_event_screen.dart';
 import 'package:persona/screens/eventList.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:persona/repository/repository.dart';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -40,67 +41,17 @@ void initState() {
     initializeSelectedEvents();
 }
 
-Future<void> initializeSelectedEvents() async {
-  try {
-    Map<DateTime, List<Event>> events = await get();
-    setState(() {
-      selectedEvents = events;
-    });
-  } catch (e) {
-    print('Error initializing selectedEvents: $e');
-    // Handle the error gracefully
-  }
-}
-
-Future<Map<DateTime, List<Event>>> get() async {
-  final response = await http.get(Uri.parse('http://10.10.6.35/api_pesona/api.php'));
-
-  if (response.statusCode == 200) {
-    print('2');
-    final data = json.decode(response.body);
-
-    for (var item in data) {
-      DateTime temp_date = DateTime.parse(item['eventDate']);
-
-      DateTime eventDate = DateTime(
-              temp_date.year,
-              temp_date.month,
-              temp_date.day,
-      );
-      
-      Event newEvent = Event(
-        title: item['title'],
-        time: item['time'],
-        location: item['location'],
-        reminder: item['reminder'],
-        notes: item['notes'],
-        date: eventDate,
-      );
-
-      if (selectedEvents.containsKey(eventDate)) {
-        bool eventExists = selectedEvents[eventDate]!.any((event) =>
-            event.time == newEvent.time &&
-            event.title == newEvent.title &&
-            event.location == newEvent.location &&
-            event.reminder == newEvent.reminder &&
-            event.notes == newEvent.notes);
-
-        if (!eventExists) {
-          selectedEvents[eventDate]!.add(newEvent);
-        }
-      } else {
-        selectedEvents[eventDate] = [newEvent];
-      }
+  Future<void> initializeSelectedEvents() async {
+    try {
+      Map<DateTime, List<Event>> events = await Repository.fetchEvents();
+      setState(() {
+        selectedEvents = events;
+      });
+    } catch (e) {
+      print('Error initializing selectedEvents: $e');
+      // Handle the error gracefully
     }
-
-
-
-    return selectedEvents;
-  } else {
-    throw Exception('Failed to fetch events');
   }
-}
-
 
   List<Event> _getEventsfromDay(DateTime date) {
     bool isToday = isSameDay(DateTime.now().toLocal(), date);
@@ -260,6 +211,7 @@ Future<Map<DateTime, List<Event>>> get() async {
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(5.0),
               ),
+              //warna hari weekend
               weekendTextStyle: TextStyle(
                 color: Colors.red,
               ),
@@ -286,9 +238,7 @@ Future<Map<DateTime, List<Event>>> get() async {
         ],
       );
   }
-  Future<void> _buildContent() async {
-    await content();
-  }
+
   @override
   Widget build(BuildContext context){
     return Scaffold(

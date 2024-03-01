@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 // import 'package:custom_line_indicator_bottom_navbar/custom_line_indicator_bottom_navbar.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:persona/repository/repository.dart';
 
 class AddEventScreen extends StatefulWidget {
   final DateTime selectedDay; // Define selectedDay as a parameter
@@ -14,23 +15,6 @@ class AddEventScreen extends StatefulWidget {
   _AddEventState createState() => _AddEventState(selectedDay: selectedDay);
 }
 
-class Event {
-  String title;
-  String time;
-  String location;
-  String reminder;
-  String notes;
-  DateTime date;
-
-  Event({
-    required this.title,
-    required this.time,
-    required this.location,
-    required this.reminder,
-    required this.notes,
-    required this.date,
-  });
-}
 stringToDayTime(DateTime dayi, String timeText){
     // Split string menjadi dua bagian, yaitu jam dan menit
     List<String> timeParts = timeText.split(':');
@@ -62,28 +46,22 @@ class _AddEventState extends State<AddEventScreen> {
   _AddEventState({required this.selectedDay});
   String? selectedValue;
 
-  void _addEventForDay(String title, String time, String location, String reminder, String notes, DateTime date) async{
-    // int reminder = int.tryParse(temp.split(' ')[0]) ?? 0;
-    // DateTime tempi = stringToDayTime(day, time) ;
-    // print('DateTime : $day /n Title: $title /n Time: $time /n Type: $type /n Note $note /n Reminder : $reminder /n Lokasi $lokasi');
+  void _addEventForDay(String title, String time, String location, String reminder, String notes, DateTime date) async {
+    try {
+      final repository = Repository();
 
-    final response = await http.post(
-      Uri.parse('http://10.10.6.35/api_pesona/api.php'),
-      body: {
+      Map<String, String> data = {
         "title": title,
         "time" : time,
         "location" : location,
         "reminder" : reminder,
         "notes" : notes,
         "eventDate" : date.toString(),
-      },
-    );
-    if (response.statusCode == 200) {
-      // Show a snackbar to indicate success
-      print('Event successfully added!');
-    } else {
-      // Show a snackbar to indicate failure
-      print('Failed to add event. Please try again.');
+      };
+
+      await repository.addEvent(data);
+    } catch (e) {
+      print('Error adding event: $e');
     }
   }
  
