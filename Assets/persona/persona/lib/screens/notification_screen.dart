@@ -41,6 +41,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 0, 10, 10), // Left, Top, Right, Bottom
+            ),
             NotificationWidget(selectedEvents: selectedEvents),
           ],
         ),
@@ -67,7 +70,10 @@ class NotificationWidget extends StatelessWidget {
 
         final dateOnly = DateTime(date.year, date.month, date.day);
 
+
         if (dateOnly == dateNowOnlyDate) {
+          events.sort((a, b) => a.time.compareTo(b.time)); // Sort events by time
+
           return EventListWidget(events: events);
         } else {
           return SizedBox();
