@@ -7,63 +7,138 @@ import 'package:persona/screens/eventList.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:persona/repository/repository.dart';
+import 'package:persona/screens/util.dart';
+import 'dart:collection';
+import 'package:intl/intl.dart';
+
 
 class CalendarScreen extends StatefulWidget {
   @override
-  _CalendarScreenState createState() => _CalendarScreenState();
+  _TableEventsExampleState createState() => _TableEventsExampleState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
-  late Map<DateTime, List<Event>> selectedEvents = {};
-  CalendarFormat format = CalendarFormat.month;
-  DateTime selectedDay = DateTime.now();
-  DateTime focusedDay = DateTime.now();
-  TextEditingController _eventController = TextEditingController();
+class _TableEventsExampleState extends State<CalendarScreen> {
+  late final ValueNotifier<List<Event>> _selectedEvents;
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode
+      .toggledOff; // Can be toggled on/off by longpressing a date
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+  DateTime? _rangeStart;
+  DateTime? _rangeEnd;
 
+  @override
   void initState() {
     super.initState();
-
-    // selectedEvents = {
-
-    //     DateTime(2024, 2, 29): [
-    //       Event(
-    //         title: 'Presentation',
-    //         time: '09:00:00',
-    //         location: 'Office',
-    //         reminder: 'Reminder 3',
-    //         notes: 'Present new product',
-    //         date: DateTime(2024, 2, 29),
-    //       ),
-    //     ],
-    //   };
-
-    initializeSelectedEvents();
+    babi();
+    _selectedDay = _focusedDay;
+    _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
   }
-
-  Future<void> initializeSelectedEvents() async {
-    try {
-      Map<DateTime, List<Event>> events = await Repository.fetchEvents();
-      setState(() {
-        selectedEvents = events;
-      });
-    } catch (e) {
-      print('Error initializing selectedEvents: $e');
-    }
-  }
-
-  List<Event> _getEventsfromDay(DateTime date) {
-    bool isToday = isSameDay(DateTime.now().toLocal(), date);
-    if (isToday) {
-      return selectedEvents[date] ?? [];
-    } else {
-      return [];
-    }
+  Future babi()async{
+    await fetchDataFromRepository();
+    setState(() {
+      _selectedDay = _focusedDay;
+      _selectedEvents.value = _getEventsForDay(_focusedDay);
+    });
   }
 
   @override
   void dispose() {
-    _eventController.dispose();
+    _selectedEvents.dispose();
     super.dispose();
+  }
+
+
+  List<Event> _getEventsForDay(DateTime day) {
+    // Implementation example
+    List<Event> events = kEvents[day] ?? [];
+    events.sort((a, b) => a.time.compareTo(b.time)); // Sort by time
+
+    // Move events with past times to the bottom
+    final now = DateTime.now();
+    events.sort((a, b) {
+      final parta = a.time.split(':');
+    final partb = b.time.split(':');
+    DateTime x = DateTime(a.date.year, a.date.month, a.date.day, int.parse(parta[0]), int.parse(parta[1]));
+    DateTime y = DateTime(b.date.year, b.date.month, b.date.day, int.parse(partb[0]), int.parse(partb[1]));
+
+      if (x.isBefore(now) && y.isBefore(now)) {
+        return a.time.compareTo(b.time);
+      } else if (x.isBefore(now)) {
+        return 1; // Move a to the bottom
+      } else if (y.isBefore(now)) {
+        return -1; // Move b to the bottom
+      } else {
+        return a.time.compareTo(b.time);
+      }
+    });
+
+    return events;
+  }
+
+  List<Event> _getEventsForRange(DateTime start, DateTime end) {
+    // Implementation example
+    final days = daysInRange(start, end);
+    List<Event> events = [];
+
+    for (final d in days) {
+      events.addAll(_getEventsForDay(d));
+    }
+
+    events.sort((a, b) => a.time.compareTo(b.time)); // Sort by time
+
+
+
+    // Move events with past times to the bottom
+    final now = DateTime.now(); 
+    events.sort((a, b) {
+      DateTime x = DateTime.parse(a.time);
+      DateTime y = DateTime.parse(b.time);
+      if (x.isBefore(now) && y.isBefore(now)) {
+        return a.time.compareTo(b.time);
+      } else if (x.isBefore(now)) {
+        return 1; // Move a to the bottom
+      } else if (y.isBefore(now)) {
+        return -1; // Move b to the bottom
+      } else {
+        return a.time.compareTo(b.time);
+      }
+    });
+
+    return events;
+  }
+
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    if (!isSameDay(_selectedDay, selectedDay)) {
+      setState(() {
+        _selectedDay = selectedDay;
+        _focusedDay = focusedDay;
+        _rangeStart = null; // Important to clean those
+        _rangeEnd = null;
+        _rangeSelectionMode = RangeSelectionMode.toggledOff;
+      });
+
+      _selectedEvents.value = _getEventsForDay(selectedDay);
+    }
+  }
+
+  void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
+    setState(() {
+      _selectedDay = null;
+      _focusedDay = focusedDay;
+      _rangeStart = start;
+      _rangeEnd = end;
+      _rangeSelectionMode = RangeSelectionMode.toggledOn;
+    });
+
+    // `start` or `end` could be null
+    if (start != null && end != null) {
+      _selectedEvents.value = _getEventsForRange(start, end);
+    } else if (start != null) {
+      _selectedEvents.value = _getEventsForDay(start);
+    } else if (end != null) {
+      _selectedEvents.value = _getEventsForDay(end);
+    }
   }
 
   int _selectedIndex = 1;
@@ -121,137 +196,106 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget isian() {
-  return Expanded(
-    child: SingleChildScrollView(
-      child: SingleChildScrollView(
-        child: Column(
-          children: selectedEvents.entries.map((entry) {
-            final date = entry.key;
-            final events = entry.value;
-
-            // Sort events by time
-            events.sort((a, b) => a.time.compareTo(b.time));
-
-            focusedDay = DateTime(
-                focusedDay.year, focusedDay.month, focusedDay.day, 0, 0, 0);
-            String focus_day = focusedDay.toString().replaceAll("Z", "");
-            final date_key = date.toString();
-            DateTime date_now = DateTime.now().toLocal();
-            date_now = DateTime(
-                date_now.year, date_now.month, date_now.day, 0, 0, 0);
-            String dateNow = date_now.toString();
-            print('focused day : $focus_day');
-            print('Datekey day : $date_key');
-            print('DateNow day : $date_now');
-            print('DateNow day : $dateNow');
-
-            if (date_now == date && date_now == focus_day) {
-              return EventListWidget(events: events);
-            } else {
-              if (focus_day == date_key) {
-                print('2');
-                return EventListWidget(events: events);
-              } else {
-                return SizedBox();
-              }
-            }
-          }).toList(),
-        ),
-      ),
-    ),
-  );
-}
-
-  Widget content() {
-    return Column(
-      children: [
-        TableCalendar(
-          focusedDay: selectedDay,
-          firstDay: DateTime(1990),
-          lastDay: DateTime(2050),
-          calendarFormat: format,
-          startingDayOfWeek: StartingDayOfWeek.sunday,
-          daysOfWeekVisible: true,
-          onDaySelected: (DateTime selectDay, DateTime focusDay) {
-            setState(() {
-              selectedDay = selectDay;
-              focusedDay = focusDay;
-            });
-          },
-          selectedDayPredicate: (DateTime date) {
-            DateTime now = DateTime.now();
-            bool isToday = isSameDay(now, date); 
-
-            if (isToday) {
-              return false; 
-            }
-
-            bool hasEvents = selectedEvents.keys
-                .any((eventDate) => isSameDay(eventDate, date));
-            bool isSelectedDay = isSameDay(selectedDay, date);
-
-            return hasEvents || isSelectedDay;
-          },
-          eventLoader: _getEventsfromDay,
-          calendarStyle: CalendarStyle(
-            isTodayHighlighted: true,
-            selectedDecoration: BoxDecoration(
-              color: Color(0xff7da0ca),
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            selectedTextStyle: TextStyle(color: Colors.white),
-            todayDecoration: BoxDecoration(
-              color: Colors.lightBlueAccent,
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            defaultDecoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            weekendDecoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            //warna hari weekend
-            weekendTextStyle: TextStyle(
-              color: Colors.red,
-            ),
-          ),
-          headerStyle: HeaderStyle(
-            formatButtonVisible: true,
-            titleCentered: true,
-            formatButtonShowsNext: false,
-            formatButtonDecoration: BoxDecoration(
-              color: Color(0xff7da0ca),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            formatButtonTextStyle: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        ),
-        Divider(
-          thickness: 1,
-          color: Colors.grey,
-        ),
-        SizedBox(height: 20),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("personA"),
+        title: Text('personA'),
         centerTitle: true,
         backgroundColor: Color(0xff7da0ca),
       ),
       body: Column(
-        children: [content(), isian()],
+        children: [
+          TableCalendar<Event>(
+            firstDay: kFirstDay,
+            lastDay: kLastDay,
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            rangeStartDay: _rangeStart,
+            rangeEndDay: _rangeEnd,
+            calendarFormat: _calendarFormat,
+            rangeSelectionMode: _rangeSelectionMode,
+            eventLoader: _getEventsForDay,
+            startingDayOfWeek: StartingDayOfWeek.monday,
+            calendarStyle: CalendarStyle(
+              // Use `CalendarStyle` to customize the UI
+              outsideDaysVisible: false,
+            ),
+            onDaySelected: _onDaySelected,
+            onRangeSelected: _onRangeSelected,
+            onFormatChanged: (format) {
+              if (_calendarFormat != format) {
+                setState(() {
+                  _calendarFormat = format;
+                });
+              }
+            },
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
+            },
+          ),
+          const SizedBox(height: 8.0),
+          Expanded(
+            child: ValueListenableBuilder<List<Event>>(
+              valueListenable: _selectedEvents,
+              builder: (context, value, _) {
+                return ListView.builder(
+                  itemCount: value.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 4.0,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: ListTile(
+                        onTap: () => print('${value[index].title}'),
+                        title: RichText(
+                          text: TextSpan(
+                            style: DefaultTextStyle.of(context).style,
+                            children: [
+                              TextSpan(
+                                text: '${value[index].title}\n',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                              ),
+                              TextSpan(
+                                text: 'Time: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(
+                                text: '${value[index].time}\n',
+                                // Tambahkan gaya teks lainnya jika diperlukan
+                              ),
+                              TextSpan(
+                                text: 'Location: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(
+                                text: '${value[index].location}\n',
+                                // Tambahkan gaya teks lainnya jika diperlukan
+                              ),
+                              TextSpan(
+                                text: 'Notes: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(
+                                text: '${value[index].notes}',
+                                // Tambahkan gaya teks lainnya jika diperlukan
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Color(0xff7da0ca),
@@ -259,14 +303,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
           Event? newEvent = await Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => AddEventScreen(selectedDay: selectedDay)),
+                builder: (context) => AddEventScreen(selectedDay: _focusedDay)),
           );
-
-          if (newEvent != null) {
+          if(newEvent != null){
             DateTime eventDate = DateTime(
-              newEvent.date!.year,
-              newEvent.date!.month,
-              newEvent.date!.day,
+              newEvent.date.year,
+              newEvent.date.month,
+              newEvent.date.day,
             );
 
             setState(() {
@@ -276,8 +319,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 newEvent.date.day,
               );
 
-              if (selectedEvents.containsKey(eventDate)) {
-                bool eventExists = selectedEvents[eventDate]!.any((event) =>
+              if (kEvents.containsKey(eventDate)) {
+                bool eventExists = kEvents[eventDate]!.any((event) =>
                     event.time == newEvent.time &&
                     event.title == newEvent.title &&
                     event.location == newEvent.location &&
@@ -285,10 +328,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     event.notes == newEvent.notes);
 
                 if (!eventExists) {
-                  selectedEvents[eventDate]!.add(newEvent);
+                  kEvents[eventDate]!.add(newEvent);
                 }
               } else {
-                selectedEvents[eventDate] = [newEvent];
+                kEvents[eventDate] = [newEvent];
               }
             });
           }
@@ -300,3 +343,68 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 }
+
+class _CalendarHeader extends StatelessWidget {
+  final DateTime focusedDay;
+  final VoidCallback onLeftArrowTap;
+  final VoidCallback onRightArrowTap;
+  final VoidCallback onTodayButtonTap;
+  final VoidCallback onClearButtonTap;
+  final bool clearButtonVisible;
+
+  const _CalendarHeader({
+    Key? key,
+    required this.focusedDay,
+    required this.onLeftArrowTap,
+    required this.onRightArrowTap,
+    required this.onTodayButtonTap,
+    required this.onClearButtonTap,
+    required this.clearButtonVisible,
+  }) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    final headerText = DateFormat.yMMM().format(focusedDay);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          const SizedBox(width: 16.0),
+          SizedBox(
+            width: 120.0,
+            child: Text(
+              headerText,
+              style: TextStyle(fontSize: 26.0),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.calendar_today, size: 20.0),
+            visualDensity: VisualDensity.compact,
+            onPressed: onTodayButtonTap,
+          ),
+          if (clearButtonVisible)
+            IconButton(
+              icon: Icon(Icons.clear, size: 20.0),
+              visualDensity: VisualDensity.compact,
+              onPressed: onClearButtonTap,
+            ),
+          const Spacer(),
+          IconButton(
+            icon: Icon(Icons.chevron_left),
+            onPressed: onLeftArrowTap,
+          ),
+          IconButton(
+            icon: Icon(Icons.chevron_right),
+            onPressed: onRightArrowTap,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+  
+
+  
+
+
