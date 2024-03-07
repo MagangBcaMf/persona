@@ -20,6 +20,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
   int _selectedIndex = 0;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;

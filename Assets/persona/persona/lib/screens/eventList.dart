@@ -32,6 +32,19 @@ class EventWidget extends StatelessWidget {
     return stringHasil;
   }
 
+  bool isWithin30Minutes() {
+    DateTime eventDateTime = DateTime(
+      event.date.year,
+      event.date.month,
+      event.date.day,
+      int.parse(event.time.split(':')[0]),
+      int.parse(event.time.split(':')[1]),
+    );
+    DateTime nowPlus30Minutes = DateTime.now().add(Duration(minutes: 30));
+
+    return eventDateTime.isBefore(nowPlus30Minutes);
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -39,6 +52,7 @@ class EventWidget extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(),
         borderRadius: BorderRadius.circular(12),
+        color: isWithin30Minutes() ? Color.fromARGB(255, 238, 18, 2) : null,
       ),
       child: ListTile(
         title: Text(
@@ -50,7 +64,13 @@ class EventWidget extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Time: ${timeSignature(event.time)}'),
+            Text(
+              'Time: ${timeSignature(event.time)}',
+              style: TextStyle(
+                fontWeight: isWithin30Minutes() ? FontWeight.bold : null,
+                fontSize: isWithin30Minutes() ? 17 : null,
+              ),
+            ),
             Text('Location: ${event.location}'),
             Text('Reminder: ${event.reminder}'),
             Text('Notes: ${event.notes}'),

@@ -58,9 +58,9 @@ class _TableEventsExampleState extends State<CalendarScreen> {
     final now = DateTime.now();
     events.sort((a, b) {
       final parta = a.time.split(':');
-    final partb = b.time.split(':');
-    DateTime x = DateTime(a.date.year, a.date.month, a.date.day, int.parse(parta[0]), int.parse(parta[1]));
-    DateTime y = DateTime(b.date.year, b.date.month, b.date.day, int.parse(partb[0]), int.parse(partb[1]));
+      final partb = b.time.split(':');
+      DateTime x = DateTime(a.date.year, a.date.month, a.date.day, int.parse(parta[0]), int.parse(parta[1]));
+      DateTime y = DateTime(b.date.year, b.date.month, b.date.day, int.parse(partb[0]), int.parse(partb[1]));
 
       if (x.isBefore(now) && y.isBefore(now)) {
         return a.time.compareTo(b.time);

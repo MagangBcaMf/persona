@@ -72,9 +72,20 @@ class NotificationWidget extends StatelessWidget {
 
 
         if (dateOnly == dateNowOnlyDate) {
+          final now = DateTime.now();
           events.sort((a, b) => a.time.compareTo(b.time)); // Sort events by time
+          final filteredEvents = events.where((event) {
+            final eventDateTime = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              int.parse(event.time.split(':')[0]),
+              int.parse(event.time.split(':')[1]),
+            );
+            return eventDateTime.isAfter(now);
+          }).toList();
 
-          return EventListWidget(events: events);
+          return EventListWidget(events: filteredEvents);
         } else {
           return SizedBox();
         }
