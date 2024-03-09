@@ -30,17 +30,10 @@ class _TableEventsExampleState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    babi();
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
   }
-  Future babi()async{
-    await fetchDataFromRepository();
-    setState(() {
-      _selectedDay = _focusedDay;
-      _selectedEvents.value = _getEventsForDay(_focusedDay);
-    });
-  }
+
 
   @override
   void dispose() {

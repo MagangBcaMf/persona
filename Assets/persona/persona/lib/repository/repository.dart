@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:persona/model/local_notifications.dart';
 import 'package:persona/model/model.dart';
 import 'package:crypto/crypto.dart';
 class Event {
@@ -21,11 +24,31 @@ class Event {
 }
 
 class Repository {
-  static const String baseUrl = 'http://10.10.6.32/api_pesona/api.php';
+  static const String baseUrl = 'http://10.10.6.50/api_pesona/api.php';
   static Future<Map<DateTime, List<Event>>> fetchEvents() async {
+    // listenToNotifications(){
+    //   print("Listening to notification");
+    //   LocalNotifications.onClickNotification.stream.listen((event) {
+    //     // Navigator.push(context, MaterialPageRoute(builder: (context)=> AnotherPage(payload : event)));
+    //   });
+    // }
     try {
       final response = await http.get(Uri.parse(baseUrl));
+      StringtoDate (DateTime Date, String time){
+        List<String> timeParts = time.split(':');
 
+        int hour = int.parse(timeParts[0]);
+        int minute = int.parse(timeParts[1]);
+
+          DateTime eventTime = DateTime(Date.year, Date.month, Date.day, hour, minute);
+          return eventTime;
+      }
+      ReminderPicker (String reminder){
+        List<String> parts = reminder.split(' ');
+        // Ambil angka dari string dan ubah menjadi integer
+        int minutesBefore = int.parse(parts[0]);
+        return minutesBefore;
+      }
       if (response.statusCode == 200) {
         Map<DateTime, List<Event>> events = {};
 
@@ -38,7 +61,7 @@ class Repository {
             tempDate.month,
             tempDate.day,
           );
-
+          
           Event newEvent = Event(
             title: item['title'],
             time: item['time'],
@@ -47,7 +70,7 @@ class Repository {
             notes: item['notes'],
             date: eventDate,
           );
-
+          
           if (events.containsKey(eventDate)) {
             bool eventExists = events[eventDate]!.any((event) =>
                 event.time == newEvent.time &&
@@ -62,6 +85,34 @@ class Repository {
           } else {
             events[eventDate] = [newEvent];
           }
+          DateTime temp = StringtoDate(newEvent.date, newEvent.time);
+          DateTime now = DateTime.now();
+          int remin = ReminderPicker(newEvent.reminder);
+          if(now.isBefore(temp)){
+            if(remin == 0){
+              LocalNotifications.showSchedulledNotification(
+                title: newEvent.title, 
+                body: "Event dimulai $remin menit lagi", 
+                payload: "abc", 
+                time: temp);
+            }else{
+              LocalNotifications.showSchedulledNotification(
+                title: newEvent.title, 
+                body: "Event dimulai $remin menit lagi", 
+                payload: "abc", 
+                time: temp.subtract(Duration(minutes:remin))
+              );
+              
+              LocalNotifications.showSchedulledNotification(
+                title: newEvent.title, 
+                body: "Event dimulai $remin menit lagi", 
+                payload: "abc", 
+                time: temp
+              );
+            };
+              
+          }
+
         }
 
         return events;

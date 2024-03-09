@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:persona/repository/repository.dart';
 import 'package:persona/screens/reminder_screen.dart';
+import 'package:persona/screens/util.dart';
 
 class AddEventScreen extends StatefulWidget {
   final DateTime selectedDay; // Define selectedDay as a parameter
@@ -47,7 +48,7 @@ class _AddEventState extends State<AddEventScreen> {
   _AddEventState({required this.selectedDay});
   String? selectedValue;
 
-  void _addEventForDay(String title, String time, String location, String reminder, String notes, DateTime date) async {
+  Future <void> _addEventForDay(String title, String time, String location, String reminder, String notes, DateTime date) async {
     try {
       final repository = Repository();
 
@@ -84,7 +85,7 @@ class _AddEventState extends State<AddEventScreen> {
 
 
   // }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -225,7 +226,7 @@ class _AddEventState extends State<AddEventScreen> {
                     ),
                     ElevatedButton(
                       child: const Text("Simpan"),
-                      onPressed: () {
+                      onPressed: () async{
                         Event newEvent = Event(
                           title: titleController.text,
                           time: timeinput.text,
@@ -234,7 +235,7 @@ class _AddEventState extends State<AddEventScreen> {
                           notes: notesController.text,
                           date: stringToDayTime(selectedDay, timeinput.text),
                         );
-                        _addEventForDay(
+                        await _addEventForDay(
                           titleController.text,
                           timeinput.text,
                           locationController.text,
@@ -243,7 +244,11 @@ class _AddEventState extends State<AddEventScreen> {
                           selectedDay.toLocal(),
                         );
                         print(newEvent.date);
-                        Navigator.pop(context, newEvent);
+                        await fetchDataFromRepository();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => CalendarScreen()),
+                        );
                       },
                     ),
                   ],

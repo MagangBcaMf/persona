@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persona/repository/repository.dart';
+import 'package:persona/screens/util.dart';
 // import 'package:persona/widgets/bottom_navbar.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:persona/widgets/home_event_image.dart';
@@ -21,8 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
   int _selectedIndex = 0;
   @override
-  void initState() {
+  void initState(){
     // TODO: implement initState
+    // await fetchDataFromRepository();
+
     super.initState();
   }
 

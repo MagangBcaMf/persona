@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:persona/screens/home_screen.dart';
 import 'package:persona/repository/repository.dart';
+import 'package:persona/screens/util.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,6 +47,8 @@ class _LoginScreenState extends State<LoginScreen> {
     bool success = await loginRepository.login(usercode, password);
     if (success) {
       print('Login success');
+      await fetchDataFromRepository();
+
       // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
         context,
