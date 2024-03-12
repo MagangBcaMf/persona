@@ -24,7 +24,7 @@ class LocalNotifications{
     await _requestNotificationPermission();
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/logo');
     final DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
             onDidReceiveLocalNotification:(id, title, body, payload) => null);
@@ -94,6 +94,8 @@ static Future showSchedulledNotification({
     required String payload,
     required DateTime time,
   })async{
+    int id_notif = (time.day+time.month+time.hour+time.minute);
+    print(id_notif);
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
     tz.TZDateTime dateTime = tz.TZDateTime.from(time, tz.getLocation('Asia/Jakarta'));
@@ -107,7 +109,7 @@ static Future showSchedulledNotification({
             ticker: 'ticker');
     const NotificationDetails notificationDetails =
         NotificationDetails(android: androidNotificationDetails);
-    await _flutterLocalNotificationsPlugin.zonedSchedule(3, title, body, dateTime, notificationDetails, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime);
+    await _flutterLocalNotificationsPlugin.zonedSchedule(id_notif, title, body, dateTime, notificationDetails, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime);
     // print(tz.TZDateTime.now(tz.local).add(const Duration(seconds: 30)));
   }
 

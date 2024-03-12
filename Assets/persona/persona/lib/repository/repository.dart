@@ -6,6 +6,7 @@ import 'package:persona/model/local_notifications.dart';
 import 'package:persona/model/model.dart';
 import 'package:crypto/crypto.dart';
 class Event {
+  String id;
   String title;
   String time;
   String location;
@@ -14,6 +15,7 @@ class Event {
   DateTime date;
 
   Event({
+    required this.id,
     required this.title,
     required this.time,
     required this.location,
@@ -24,7 +26,7 @@ class Event {
 }
 
 class Repository {
-  static const String baseUrl = 'http://10.10.6.50/api_pesona/api.php';
+  static const String baseUrl = 'http://10.10.6.78/api_pesona/api.php';
   static Future<Map<DateTime, List<Event>>> fetchEvents() async {
     // listenToNotifications(){
     //   print("Listening to notification");
@@ -63,6 +65,7 @@ class Repository {
           );
           
           Event newEvent = Event(
+            id : item['id'],
             title: item['title'],
             time: item['time'],
             location: item['location'],
@@ -92,20 +95,20 @@ class Repository {
             if(remin == 0){
               LocalNotifications.showSchedulledNotification(
                 title: newEvent.title, 
-                body: "Event dimulai $remin menit lagi", 
+                body: "${newEvent.title}dimulai $remin menit lagi", 
                 payload: "abc", 
                 time: temp);
             }else{
               LocalNotifications.showSchedulledNotification(
                 title: newEvent.title, 
-                body: "Event dimulai $remin menit lagi", 
+                body: "${newEvent.title} dimulai $remin menit lagi", 
                 payload: "abc", 
                 time: temp.subtract(Duration(minutes:remin))
               );
               
               LocalNotifications.showSchedulledNotification(
                 title: newEvent.title, 
-                body: "Event dimulai $remin menit lagi", 
+                body: "${newEvent.title} dimulai", 
                 payload: "abc", 
                 time: temp
               );

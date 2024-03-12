@@ -228,6 +228,7 @@ class _AddEventState extends State<AddEventScreen> {
                       child: const Text("Simpan"),
                       onPressed: () async{
                         Event newEvent = Event(
+                          id : 'NULL',
                           title: titleController.text,
                           time: timeinput.text,
                           location: locationController.text,
