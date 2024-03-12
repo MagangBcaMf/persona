@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:persona/model/local_notifications.dart';
 import 'package:persona/model/model.dart';
 import 'package:crypto/crypto.dart';
+
+String id_user = "";
+
 class Event {
   String id;
   String title;
@@ -186,6 +189,7 @@ class LoginRepository {
   final String uniqueCode = 'U5312MGMT';
   static String? username;
   static String? nik;
+  static String? id;
 
   String generateSHA1Hash(String usercode) {
     List<int> bytes = utf8.encode(usercode);
@@ -222,6 +226,8 @@ class LoginRepository {
       Map<String, dynamic> obj = json.decode(response.body);
       username = obj["DATA"]["user_name"];
       nik = obj["DATA"]["user_code"];
+      id_user = obj["DATA"]["user_id"];
+      print(id_user);
       // print(username);
       // print(nik);
       return true;

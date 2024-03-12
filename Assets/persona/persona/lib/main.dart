@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:persona/model/local_notifications.dart';
+import 'package:persona/repository/repository.dart';
 import 'package:persona/screens/change_password_screen.dart';
 import 'package:persona/screens/home_screen.dart';
 import 'package:persona/screens/approval_screen.dart';
@@ -23,6 +24,7 @@ void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await LocalNotifications.init();
   await fetchDataFromRepository();
+  
   runApp(const MyApp());
 }
 

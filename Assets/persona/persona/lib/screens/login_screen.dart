@@ -47,6 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
     bool success = await loginRepository.login(usercode, password);
     if (success) {
       print('Login success');
+      print(id_user);
       await fetchDataFromRepository();
 
       // ignore: use_build_context_synchronously
