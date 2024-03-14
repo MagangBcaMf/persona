@@ -29,7 +29,7 @@ class Event {
 }
 
 class Repository {
-  static const String baseUrl = 'http://10.10.6.78/api_pesona/api.php';
+  static const String baseUrl = 'http://10.10.6.25/api_pesona/api.php';
   static Future<Map<DateTime, List<Event>>> fetchEvents() async {
     // listenToNotifications(){
     //   print("Listening to notification");
@@ -94,14 +94,14 @@ class Repository {
           DateTime temp = StringtoDate(newEvent.date, newEvent.time);
           DateTime now = DateTime.now();
           int remin = ReminderPicker(newEvent.reminder);
-          if(now.isBefore(temp)){
+          if(now.isAfter(temp.subtract(Duration(minutes: remin)))&&now.isBefore(temp)){
             if(remin == 0){
               LocalNotifications.showSchedulledNotification(
                 title: newEvent.title, 
                 body: "${newEvent.title}dimulai $remin menit lagi", 
                 payload: "abc", 
                 time: temp);
-            }else{
+            }else if(now.isBefore(temp.subtract(Duration(minutes: remin)))){
               LocalNotifications.showSchedulledNotification(
                 title: newEvent.title, 
                 body: "${newEvent.title} dimulai $remin menit lagi", 

@@ -83,11 +83,13 @@ class _AddEventState extends State<AddEventScreen> {
   // void daySelectedtime(){
   //   DateTime babi;
 
+  bool _isLoading = false;
 
   // }
   
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text("personA"),
@@ -225,33 +227,47 @@ class _AddEventState extends State<AddEventScreen> {
                       child: const Text("Kembali"),
                     ),
                     ElevatedButton(
-                      child: const Text("Simpan"),
-                      onPressed: () async{
-                        Event newEvent = Event(
-                          id : 'NULL',
-                          title: titleController.text,
-                          time: timeinput.text,
-                          location: locationController.text,
-                          reminder: selectedValue ?? '',
-                          notes: notesController.text,
-                          date: stringToDayTime(selectedDay, timeinput.text),
-                        );
-                        await _addEventForDay(
-                          titleController.text,
-                          timeinput.text,
-                          locationController.text,
-                          selectedValue ?? '',
-                          notesController.text,
-                          selectedDay.toLocal(),
-                        );
-                        print(newEvent.date);
-                        await fetchDataFromRepository();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => CalendarScreen()),
-                        );
-                      },
+                      child: _isLoading
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text("Simpan"),
+                      onPressed: _isLoading
+                          ? null // Menonaktifkan tombol saat sedang memuat
+                          : () async {
+                              setState(() {
+                                _isLoading = true; // Mengatur status loading menjadi true
+                              });
+                              Event newEvent = Event(
+                                id: 'NULL',
+                                title: titleController.text,
+                                time: timeinput.text,
+                                location: locationController.text,
+                                reminder: selectedValue ?? '',
+                                notes: notesController.text,
+                                date: stringToDayTime(selectedDay, timeinput.text),
+                              );
+                              await _addEventForDay(
+                                titleController.text,
+                                timeinput.text,
+                                locationController.text,
+                                selectedValue ?? '',
+                                notesController.text,
+                                selectedDay.toLocal(),
+                              );
+                              print(newEvent.date);
+                              await fetchDataFromRepository();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => CalendarScreen()),
+                              );
+                            },
                     ),
+
                   ],
                 ),
               ],

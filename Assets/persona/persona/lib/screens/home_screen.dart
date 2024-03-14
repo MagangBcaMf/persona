@@ -9,6 +9,7 @@ import 'package:persona/widgets/home_event_image.dart';
 // import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:custom_line_indicator_bottom_navbar/custom_line_indicator_bottom_navbar.dart';
 
+import '../model/database_instance.dart';
 import '../widgets/home_latest_news.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,15 +22,20 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
   int _selectedIndex = 0;
+  bool isClicked = false;
   @override
   void initState(){
     // TODO: implement initState
     // await fetchDataFromRepository();
-
+    NotificationChecker();
     super.initState();
+  }
+  Future <void> NotificationChecker()async{
+    isClicked = await DatabaseHelper().checkisClick();
   }
 
   Widget build(BuildContext context) {
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -65,7 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    Widget Welcome(BuildContext context, int notificationCount) {
+    Widget Welcome(BuildContext context) {
+      // print(isClicked);
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -95,18 +102,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.pushNamed(context, '/notification');
                       },
                     ),
-                    if (notificationCount > 0)
-                      Positioned(
-                        top: 11,
-                        right: 9,
-                        child: Container(
-                          padding: EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ),
+                    FutureBuilder(
+                      future: DatabaseHelper().checkisClick(), 
+                      builder: ((context, snapshot) {
+                        if(snapshot.data == true){
+                          return Positioned(
+                            top: 11,
+                            right: 9,
+                            child: Container(
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.red,
+                              ),
+                            ),
+                          );
+                        }
+                        return SizedBox();
+                      })
+                    )
                   ],
                 ),
               ],
@@ -679,7 +693,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Welcome(context, 2),
+                    Welcome(context),
                     Approval(),
                     EventSlider(),
                     Culture(),

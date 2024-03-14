@@ -59,7 +59,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Future<bool> _simpanEvent(String event_id, String user_id) async {
     final response = await http.post(
-      Uri.parse('http://10.10.6.82/api_pesona/create.php'),
+      Uri.parse('http://10.10.6.70/api_pesona/create.php'),
       body: {
         "event_ids": event_id,
         "user_ids": user_id,
@@ -77,7 +77,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
 Future<List<dynamic>> _get(user_id) async {
   final response = await http.post(
-    Uri.parse('http://10.10.6.82/api_pesona/read.php'),
+    Uri.parse('http://10.10.6.70/api_pesona/read.php'),
     body: {
       "user_id": user_id,
     },
@@ -108,7 +108,7 @@ Color getColor(String eventId, List<dynamic> temp) {
     _get(id_user);
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

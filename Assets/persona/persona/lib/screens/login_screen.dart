@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           Center(
             child: Padding(
-              padding: EdgeInsets.only(left: 50, right: 50),
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1, vertical: screenWidth*0.1),
               child: Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(40),

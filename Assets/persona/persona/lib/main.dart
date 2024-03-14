@@ -5,6 +5,7 @@ import 'package:persona/screens/change_password_screen.dart';
 import 'package:persona/screens/home_screen.dart';
 import 'package:persona/screens/approval_screen.dart';
 import 'package:persona/screens/news_detail_screen.dart';
+import 'package:persona/screens/notif_test.dart';
 import 'package:persona/screens/notification_screen.dart';
 import 'package:persona/screens/onboarding_screen.dart';
 import 'package:persona/screens/splash_screen.dart';
@@ -60,7 +61,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfileScreen(),
         '/reminder': (context) => CalendarScreen(),
         // '/reminderAdd': (context) => AddEventScreen(selectedDay: DateTime.now()),
-        '/notification': (context) => NotificationScreen(),
+        '/notification': (context) => Notifi(),
         '/change_password': (context) => ChangePasswordScreen(),
       },
     );

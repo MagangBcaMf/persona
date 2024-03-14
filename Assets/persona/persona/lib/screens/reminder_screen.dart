@@ -193,6 +193,7 @@ class _TableEventsExampleState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text('personA'),
         centerTitle: true,
         backgroundColor: Color(0xff7da0ca),
