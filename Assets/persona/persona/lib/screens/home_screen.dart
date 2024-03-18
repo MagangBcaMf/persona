@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     // await fetchDataFromRepository();
     dbHelper.initDb;
-    NotificationChecker();
+    // NotificationChecker();
     // init();
     super.initState();
   }
@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future <void> NotificationChecker()async{
     bool babi = await dbHelper.checkisClick();
-    print(babi);
+    // print(babi);
   }
 
   Widget build(BuildContext context) {
@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     FutureBuilder(
                       future: DatabaseHelper().checkisClick(), 
                       builder: ((context, snapshot) {
-                        print(snapshot.data);
+                        // print(snapshot.data);
                         if(snapshot.data == true){
                           return Positioned(
                             top: 11,

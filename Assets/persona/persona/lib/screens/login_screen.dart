@@ -67,12 +67,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+Widget build(BuildContext context) {
+  double screenWidth = MediaQuery.of(context).size.width;
+  double screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      body: Stack(
+  return Scaffold(
+    body: SingleChildScrollView(
+      child: Stack(
         children: [
           Image.asset(
             "assets/bglogin.png",
@@ -82,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1, vertical: screenWidth*0.1),
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1, vertical: screenWidth*0.35),
               child: Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(40),
@@ -136,12 +137,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                           ),
                         ),
-                        // validator: (value) {
-                        //   if (value == null || value.isEmpty) {
-                        //     return 'Password harus diisi';
-                        //   }
-                        //   return null;
-                        // },
                       ),
                       SizedBox(height: screenHeight * 0.04),
                       ElevatedButton(
@@ -179,6 +174,9 @@ class _LoginScreenState extends State<LoginScreen> {
           )
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 }
