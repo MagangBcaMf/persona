@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:persona/screens/home_screen.dart';
 import 'package:persona/repository/repository.dart';
-import 'package:persona/screens/util.dart';
+import 'package:persona/controller/util.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

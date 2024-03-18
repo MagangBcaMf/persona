@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:persona/repository/repository.dart';
 import 'package:persona/screens/reminder_screen.dart';
-import 'package:persona/screens/util.dart';
+import 'package:persona/controller/util.dart';
 
 class AddEventScreen extends StatefulWidget {
   final DateTime selectedDay; // Define selectedDay as a parameter

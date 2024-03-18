@@ -3,10 +3,11 @@ import 'dart:collection';
 import 'package:custom_line_indicator_bottom_navbar/custom_line_indicator_bottom_navbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:persona/controller/notify.dart';
 import 'package:persona/model/database_instance.dart';
 import 'package:persona/repository/repository.dart';
 import 'package:persona/screens/eventList.dart';
-import 'package:persona/screens/util.dart';
+import 'package:persona/controller/util.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -20,9 +21,11 @@ class Notifi extends StatefulWidget {
 }
 
 class _NotifiState extends State<Notifi> {
+  List<Map<String, dynamic>> rows = [] ;
   late final LinkedHashMap<DateTime, List<Event>> babi = kEvents;
   List<Event> selectedEvents = [];
   List<dynamic> temp = [];
+  int? isCLicked;
   final dbHelper = DatabaseHelper();
    int _selectedIndex = 5;
     void _onItemTapped(int index) {
@@ -48,20 +51,31 @@ class _NotifiState extends State<Notifi> {
       }
     }
 
+  Future <void> init()async{
+    await dbHelper.initDb();
+    rows = await dbHelper.queryAllRows();
+    print("dari rows $rows");
 
-  List<Map<String, dynamic>> rows = [];
+    // List<int> babi = await dbHelper.getallID(73);
+    // print(babi);
+    // print("${babi[1]} ${babi[0]}");
+    // print(babi.length);
+  }
   @override
   void initState() {
     // TODO: implement initState
     // dbHelper.deleteAll();
+    // init();
+    Notify().initState();
     super.initState();
-    init();
   }
-  Future <void> init()async{
-    rows = await dbHelper.queryAllRows();
-    rows.forEach((row) {
-      print("${row['id']} ${row['id_event']} ${row['isClicked']}");
-    });
+  
+  DateTime mergeDateandTime (DateTime date, String time){
+    List<String> splitTime = time.split(':');
+    int hour = int.parse(splitTime[0]);
+    int minute = int.parse(splitTime[1]);
+
+    return DateTime(date.year, date.month, date.day, hour, minute);
   }
 
   @override
@@ -112,7 +126,7 @@ class _NotifiState extends State<Notifi> {
       );
     }
 
-    
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -131,98 +145,119 @@ class _NotifiState extends State<Notifi> {
             itemCount: upcomingEvents.length,
             itemBuilder: (context, index) {
               Event event = upcomingEvents[index];
+              int test = int.parse(event.id);
               return FutureBuilder(
-                future: dbHelper.queryRowById(int.parse(event.id)), 
-                builder: ((context, snapshot) {
-                  int? isClicked;
-                  print("nano${snapshot.data}");
-                  if(snapshot.hasData == false){
-                    print("${dbHelper.checkID(int.parse(event.id)).toString()}");
-                    
-                    dbHelper.insert({
-                        'id_event': '${event.id}',
-                        'isClicked': 0,
+                future: dbHelper.checkData(test), 
+                builder: (context, snapshot) {
+                  // dbHelper.queryRowById(int.parse(event.id)).then((existingData) {
+                  //   if(existingData == null) {
+                  //     // Jika tidak ada data dengan ID event yang sama, masukkan ke dalam database
+
+                  //     print('babi');
+                  //   } else {
+                  //     // Jika data sudah ada, tidak perlu melakukan apa-apa
+                  //   }
+                  // });
+                  // print(event.id);
+                  // print("${event.date} ${event.time}");
+                  if(snapshot.data == false ){
+                    DateTime now = DateTime.now();
+                    DateTime tempTime = mergeDateandTime(event.date, event.time);
+                    if(now.isAtSameMomentAs(tempTime) || now.isAfter(tempTime)){
+                      dbHelper.insert({
+                        'id_event' : int.parse(event.id),
+                        'isClicked' : 0
                       });
+                    }
                     
-                  }else isClicked = snapshot.data;
-                    
-                  // isClicked = 0;
-                  // }else{
-                  //   isClicked = snapshot.data;
-                  // }         
-                  return GestureDetector(
-                    onTap: () async{
-                      // Panggil fungsi dbHelper.update() di sini
-                      int? babi = await dbHelper.getIdByEvent(int.parse(event.id));
-                      print(babi);
-                      await dbHelper.update({
-                        'id' : babi!,
-                        'id_event' : event.id, 
-                        'isClicked': 1
-                      }); // Misalnya, menandai event sebagai sudah diklik
-                      setState(() {
-                        // print(dbHelper.getIdByEvent(int.parse(event.id)));
-                      });
-                    },
-                    child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 3.0, horizontal: 7.0),
-                      padding: EdgeInsets.all(10.0),
-                      decoration: BoxDecoration(
-                        color: isClicked == 1 ? Colors.white : Colors.blue[100],
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                  }else if(snapshot.data == null){
+                    return CircularProgressIndicator();
+                  }
+                  return FutureBuilder(
+                    future: dbHelper.queryRowById(test), 
+                    builder: (context, isClick) {
+                      if(isClick.data == null){
+                        return CircularProgressIndicator();
+                      }else{
+                        isCLicked = isClick.data;
+                      }
+
+                      return GestureDetector(
+                        onTap: () async {
+                          // Panggil fungsi dbHelper.update() di sini
+                          List<int> temp = await dbHelper.getallID(int.parse(event.id));
+                          if(temp.length == 2){
+                            dbHelper.delete(temp[1]);
+                          }
+                          await dbHelper.update({
+                            'id' : await dbHelper.getIdByEvent(int.parse(event.id)),
+                            'id_event': event.id,
+                            'isClicked': 1,
+                          }); // Misalnya, menandai event sebagai sudah diklik
+                          setState(() {});
+                        },
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 3.0, horizontal: 7.0),
+                          padding: EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: isCLicked == 1 ? Colors.white : Colors.blue[100],
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: RichText(
-                                  text: TextSpan(
-                                    text: event.title,
-                                    style: TextStyle(
-                                      color: Colors.black, // warna teks
-                                      fontSize: 23,
-                                      fontWeight: FontWeight.bold,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: RichText(
+                                      text: TextSpan(
+                                        text: ('${event.title} ${event.id}'),
+                                        style: TextStyle(
+                                          color: Colors.black, // warna teks
+                                          fontSize: 23,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      textAlign: TextAlign.left,
                                     ),
                                   ),
-                                  textAlign: TextAlign.left,
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 5), // Spacer
-                          Container(
-                            height: 1, // Tinggi garis bawah
-                            color: Colors.black, // Warna garis bawah
-                          ),
-                          SizedBox(height: 10), // Spacer
-                          Text(
-                            '${event.notes}',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          SizedBox(height: 10), // Spacer
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
+                              SizedBox(height: 5), // Spacer
+                              Container(
+                                height: 1, // Tinggi garis bawah
+                                color: Colors.black, // Warna garis bawah
+                              ),
+                              SizedBox(height: 10), // Spacer
                               Text(
-                                '${event.date.day}/${event.date.month}/${event.date.year} ${event.time}',
+                                '${event.notes}',
                                 style: TextStyle(fontSize: 16),
                               ),
+                              SizedBox(height: 10), // Spacer
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '${event.date.day}/${event.date.month}/${event.date.year} ${event.time}',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ],
+                              ),
                             ],
-                          ),
-                        ],
-                      )
-                    ),
+                          )
+                        )
+                      );
+                      
+                      
+                    }
                   );
-
-                })
+                }
               );
-            },
-          ),
+              
+            })
+          )
         )
-      )
-    ),
+      ),
     bottomNavigationBar: Column(
       mainAxisSize: MainAxisSize.min,
       children: [

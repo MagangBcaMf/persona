@@ -7,7 +7,7 @@ import 'package:persona/screens/eventList.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:persona/repository/repository.dart';
-import 'package:persona/screens/util.dart';
+import 'package:persona/controller/util.dart';
 import 'dart:collection';
 import 'package:intl/intl.dart';
 

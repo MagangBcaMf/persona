@@ -89,8 +89,9 @@ class DatabaseHelper {
     int? lastInsertedId = result.isNotEmpty ? result.first['id'] : 0;
     return lastInsertedId;
   }
+  
   //check by ID
-  Future<bool> checkID(int id_event) async {
+  Future<int> checkID(int id_event) async {
     Database? dbClient = await db;
     List<Map<String, dynamic>> result = await dbClient!.query(
       '$table',
@@ -98,8 +99,8 @@ class DatabaseHelper {
       whereArgs: [id_event],
     );
     if(result.isEmpty){
-      return false;
-    }return true;
+      return 0;
+    }return 1;
   }
 
   //get id
@@ -118,8 +119,23 @@ class DatabaseHelper {
     }
   }
 
+  Future <bool> checkData(int id_event) async{
+    Database? dbClient = await db;
+    List<Map<String, dynamic>> result = await dbClient!.query(
+      '$table',
+      where: 'id_event = ?',
+      whereArgs: [id_event],
+    );
+    if (result.isNotEmpty) {
+      // Mengembalikan ID jika ditemukan
+      return true;
+    } else {
+      return false; // Mengembalikan null jika tidak ditemukan
+    }
+  }
+
   //Query Row by ID
-  Future queryRowById(int id_event) async {
+  Future <int?> queryRowById(int id_event) async {
     Database? dbClient = await db;
     List<Map<String, dynamic>> result = await dbClient!.query(
       '$table',
@@ -136,6 +152,20 @@ class DatabaseHelper {
     }
   }
 
+
+  Future<List<int>> getallID(int id_event) async {
+  Database? dbClient = await db;
+  List<Map<String, dynamic>> result = await dbClient!.query(
+    '$table',
+    where: 'id_event = ?',
+    whereArgs: [id_event],
+  );
+  List<int> ids = [];
+  for (var row in result) {
+    ids.add(row['id'] as int);
+  }
+  return ids;
+}
 
   // Close the database
   Future close() async {

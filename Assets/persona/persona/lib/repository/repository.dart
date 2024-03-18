@@ -29,7 +29,7 @@ class Event {
 }
 
 class Repository {
-  static const String baseUrl = 'http://10.10.6.25/api_pesona/api.php';
+  static const String baseUrl = 'http://10.10.6.47/api_pesona/api.php';
   static Future<Map<DateTime, List<Event>>> fetchEvents() async {
     // listenToNotifications(){
     //   print("Listening to notification");

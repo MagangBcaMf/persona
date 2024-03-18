@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:persona/controller/notify.dart';
 import 'package:persona/model/local_notifications.dart';
 import 'package:persona/repository/repository.dart';
 import 'package:persona/screens/change_password_screen.dart';
@@ -19,11 +20,12 @@ import 'package:persona/screens/instruksi_keuangan_screen.dart';
 import 'package:persona/screens/introduction_keuangan.dart';
 import 'package:persona/screens/reminder_screen.dart';
 import 'package:persona/screens/add_event_screen.dart';
-import 'package:persona/screens/util.dart';
+import 'package:persona/controller/util.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await LocalNotifications.init();
+  await Notify().initState;
   await fetchDataFromRepository();
   
   runApp(const MyApp());

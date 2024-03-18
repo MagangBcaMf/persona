@@ -2,7 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persona/repository/repository.dart';
-import 'package:persona/screens/util.dart';
+import 'package:persona/controller/util.dart';
 // import 'package:persona/widgets/bottom_navbar.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:persona/widgets/home_event_image.dart';
@@ -23,15 +23,30 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
   int _selectedIndex = 0;
   bool isClicked = false;
+  final dbHelper = DatabaseHelper();
+  List<Map<String, dynamic>> rows = [] ;
+
+
   @override
   void initState(){
     // TODO: implement initState
     // await fetchDataFromRepository();
+    dbHelper.initDb;
     NotificationChecker();
+    // init();
     super.initState();
   }
+
+  Future <void> init()async{
+    await dbHelper.initDb();
+    rows = await dbHelper.queryAllRows();
+    print("dari rows $rows");
+
+  }
+
   Future <void> NotificationChecker()async{
-    isClicked = await DatabaseHelper().checkisClick();
+    bool babi = await dbHelper.checkisClick();
+    print(babi);
   }
 
   Widget build(BuildContext context) {
@@ -105,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     FutureBuilder(
                       future: DatabaseHelper().checkisClick(), 
                       builder: ((context, snapshot) {
+                        print(snapshot.data);
                         if(snapshot.data == true){
                           return Positioned(
                             top: 11,
