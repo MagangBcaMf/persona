@@ -171,13 +171,13 @@ class _NotifiState extends State<Notifi> {
                     }
                     
                   }else if(snapshot.data == null){
-                    return CircularProgressIndicator();
+                    // return CircularProgressIndicator();
                   }
                   return FutureBuilder(
                     future: dbHelper.queryRowById(test), 
                     builder: (context, isClick) {
                       if(isClick.data == null){
-                        return CircularProgressIndicator();
+                        // return CircularProgressIndicator();
                       }else{
                         isCLicked = isClick.data;
                       }
