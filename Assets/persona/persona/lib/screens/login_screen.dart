@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       print('Login success');
       print(id_user);
-      await fetchDataFromRepository();
+      // await fetchDataFromRepository();
 
       // ignore: use_build_context_synchronously
       Navigator.pushReplacement(

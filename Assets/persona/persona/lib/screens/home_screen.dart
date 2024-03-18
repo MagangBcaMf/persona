@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     // await fetchDataFromRepository();
     dbHelper.initDb;
-    NotificationChecker();
+    // NotificationChecker();
     // init();
     super.initState();
   }
