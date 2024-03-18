@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:persona/model/dblogin.dart';
 import 'package:persona/model/local_notifications.dart';
 import 'package:persona/model/model.dart';
 import 'package:crypto/crypto.dart';
+
 
 String id_user = "";
 
@@ -189,7 +191,12 @@ class LoginRepository {
   final String uniqueCode = 'U5312MGMT';
   static String? username;
   static String? nik;
+  final dbLogin = DatabaseLogin();
   static String? id;
+
+  void initState(){
+    dbLogin.initDb();
+  }
 
   String generateSHA1Hash(String usercode) {
     List<int> bytes = utf8.encode(usercode);
@@ -227,7 +234,13 @@ class LoginRepository {
       username = obj["DATA"]["user_name"];
       nik = obj["DATA"]["user_code"];
       id_user = obj["DATA"]["user_id"];
-      print(id_user);
+      // print(id_user);
+      await dbLogin.update({
+        'id':1,
+        'id_user': id_user,
+      });
+
+      print(await dbLogin.queryAllRows());
       // print(username);
       // print(nik);
       return true;
@@ -240,5 +253,10 @@ class LoginRepository {
   Future<void> logout() async {
     // logout logic (clear authentication tokens, etc.)
     print('Logout successful');
+    await dbLogin.update({
+      'id':1,
+      'id_user': -100,
+    });
+    print(await dbLogin.queryAllRows());
   }
 }

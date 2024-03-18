@@ -127,7 +127,6 @@ class DatabaseHelper {
       whereArgs: [id_event],
     );
     if (result.isNotEmpty) {
-      // Mengembalikan ID jika ditemukan
       return true;
     } else {
       return false; // Mengembalikan null jika tidak ditemukan

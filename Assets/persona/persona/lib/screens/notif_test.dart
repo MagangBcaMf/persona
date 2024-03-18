@@ -36,7 +36,7 @@ class _NotifiState extends State<Notifi> {
 
         switch (index) {
           case 0:
-            Navigator.pushNamed(context, '/home');
+            Navigator.pushNamed(context, '/');
             break;
           case 1:
             Navigator.pushNamed(context, '/reminder');
@@ -149,17 +149,6 @@ class _NotifiState extends State<Notifi> {
               return FutureBuilder(
                 future: dbHelper.checkData(test), 
                 builder: (context, snapshot) {
-                  // dbHelper.queryRowById(int.parse(event.id)).then((existingData) {
-                  //   if(existingData == null) {
-                  //     // Jika tidak ada data dengan ID event yang sama, masukkan ke dalam database
-
-                  //     print('babi');
-                  //   } else {
-                  //     // Jika data sudah ada, tidak perlu melakukan apa-apa
-                  //   }
-                  // });
-                  // print(event.id);
-                  // print("${event.date} ${event.time}");
                   if(snapshot.data == false ){
                     DateTime now = DateTime.now();
                     DateTime tempTime = mergeDateandTime(event.date, event.time);

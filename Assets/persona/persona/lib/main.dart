@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:persona/controller/notify.dart';
+import 'package:persona/model/dblogin.dart';
 import 'package:persona/model/local_notifications.dart';
 import 'package:persona/repository/repository.dart';
 import 'package:persona/screens/change_password_screen.dart';
@@ -27,22 +28,33 @@ void main() async{
   await LocalNotifications.init();
   await Notify().initState;
   await fetchDataFromRepository();
+  final int test = await babi();
   
-  runApp(const MyApp());
+  runApp(MyApp(route: test));
+}
+
+Future babi() async{
+  final dbLogin = DatabaseLogin();
+  int userID = await dbLogin.checkData(1);
+  return userID;
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final int route;
 
+  const MyApp({Key? key, required this.route});
   @override
+  
   Widget build(BuildContext context) {
-    return MaterialApp(
+    
+    return MaterialApp (
       debugShowCheckedModeBanner: false,
       // initialRoute: '/home',
+      
       routes: {
-        '/': (context) => HomeScreen(), 
-        // '/': (context) => ApprovalListScreen(),
+        '/': (context) => route == -100 ? LoginScreen() : HomeScreen(), 
         '/home': (context) => HomeScreen(),
+        // '/': (context) => ApprovalListScreen(),
         '/intro': (context) => OnBoardingScreen(),
         '/approval': (context) => ApprovalListScreen(),
         '/news_detail': (context) => NewsDetailsScreen(),
@@ -67,5 +79,6 @@ class MyApp extends StatelessWidget {
         '/change_password': (context) => ChangePasswordScreen(),
       },
     );
+  
   }
 }

@@ -1,8 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:persona/model/dblogin.dart';
 import 'package:persona/repository/repository.dart';
 import 'package:persona/controller/util.dart';
+import 'package:persona/screens/login_screen.dart';
 // import 'package:persona/widgets/bottom_navbar.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:persona/widgets/home_event_image.dart';
@@ -24,7 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool isClicked = false;
   final dbHelper = DatabaseHelper();
+  final dbLogin = DatabaseLogin();
   List<Map<String, dynamic>> rows = [] ;
+
 
 
   @override
@@ -32,16 +36,31 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     // await fetchDataFromRepository();
     dbHelper.initDb;
-    // NotificationChecker();
-    // init();
     super.initState();
+    init();
   }
 
-  Future <void> init()async{
+  Future<void> init() async {
     await dbHelper.initDb();
     rows = await dbHelper.queryAllRows();
     print("dari rows $rows");
+  }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Cek jika pengguna harus dialihkan ke LoginScreen
+    Future.delayed(Duration.zero, () async {
+      int userID = await dbLogin.checkData(1);
+      print(userID);
+      if (userID == -100) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      }
+    });
   }
 
   Future <void> NotificationChecker()async{
@@ -621,7 +640,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         switch (index) {
           case 0:
-            Navigator.pushNamed(context, '/home');
+            Navigator.pushNamed(context, '/');
             break;
           case 1:
             Navigator.pushNamed(context, '/reminder');
