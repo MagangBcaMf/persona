@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseLogin {
   static final DatabaseLogin _instance = DatabaseLogin.internal();
-  var table = "user";
+  var table = "profile";
   factory DatabaseLogin() => _instance;
 
   static Database? _db;
@@ -19,7 +19,7 @@ class DatabaseLogin {
 
   Future<Database> initDb() async {
     String databasesPath = await getDatabasesPath();
-    String path = join(databasesPath, 'user.db');
+    String path = join(databasesPath, 'profile.db');
 
     // Create the database
     var db = await openDatabase(path, version: 1, onCreate: _onCreate);
@@ -38,12 +38,14 @@ class DatabaseLogin {
     final String createTableQuery = '''
       CREATE TABLE IF NOT EXISTS $table (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_user INTEGER
+        id_user INTEGER,
+        name TEXT,
+        nik TEXT
       )
     ''';
 
     final String insertQuery = '''
-      INSERT INTO $table (id_user) VALUES (123)
+      INSERT INTO $table (id_user, name, nik) VALUES (-100, 'test', 'test')
     ''';
 
     await db.execute(createTableQuery);
@@ -92,21 +94,14 @@ class DatabaseLogin {
   }
 
   //Query Row by ID
-  Future <int?> queryRowById(int id_event) async {
+  Future <List<Map<String, dynamic>>> queryRowById(int id) async {
     Database? dbClient = await db;
     List<Map<String, dynamic>> result = await dbClient!.query(
       '$table',
-      where: 'id_event = ?',
-      whereArgs: [id_event],
+      where: 'id = ?',
+      whereArgs: [id],
     );
-    if (result.isNotEmpty) {
-    // Check if the event is clicked
-      int isClicked = result.first['isClicked'];
-
-      return isClicked;
-    } else {
-      return null;
-    }
+    return result;
   }
 
 

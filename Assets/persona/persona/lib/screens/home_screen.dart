@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -42,31 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> init() async {
     await dbHelper.initDb();
-    rows = await dbHelper.queryAllRows();
-    print("dari rows $rows");
+    rows = await dbLogin.queryAllRows();
+    print("${rows[0]['name']}");
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
 
-    // Cek jika pengguna harus dialihkan ke LoginScreen
-    Future.delayed(Duration.zero, () async {
-      int userID = await dbLogin.checkData(1);
-      print(userID);
-      if (userID == -100) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
-        );
-      }
-    });
-  }
-
-  Future <void> NotificationChecker()async{
-    bool babi = await dbHelper.checkisClick();
-    // print(babi);
-  }
 
   Widget build(BuildContext context) {
 
@@ -163,10 +146,24 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Padding(
             padding: EdgeInsets.fromLTRB(18.0, 0.0, 0.0, 10.0),
-            child: Text(
-              "Selamat datang, ${LoginRepository.username}",
-              style: const TextStyle(color: Colors.white),
-            ),
+            child: FutureBuilder(
+              future: dbLogin.queryRowById(1), 
+              builder: ((context, snapshot) {
+                if(snapshot.hasData){
+                  rows = snapshot.data!;
+                  return Text(
+                    "Selamat datang, ${rows[0]['name']}",
+                    style: const TextStyle(color: Colors.white),
+                  );
+                }else{
+                  return Text(
+                    "Selamat datang, ${LoginRepository.username}",
+                    style: const TextStyle(color: Colors.white),
+                  );
+                }
+                
+              })
+            )
           ),
         ],
       );
@@ -714,34 +711,66 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage("assets/bghome.png"), fit: BoxFit.fill),
-          ),
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Welcome(context),
-                    Approval(),
-                    EventSlider(),
-                    Culture(),
-                    LatestEvent(),
-                    LatestNews(),
-                  ],
+    return WillPopScope(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage("assets/bghome.png"), fit: BoxFit.fill),
+            ),
+            child: Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Welcome(context),
+                      Approval(),
+                      EventSlider(),
+                      Culture(),
+                      LatestEvent(),
+                      LatestNews(),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavBar(),
+        bottomNavigationBar: BottomNavBar(),
+      ), 
+        
+      onWillPop: () async {
+        final shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Exit'),
+              content: const Text('Are you sure you want to exit the app?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    exit(0);
+                  },
+                  child: const Text('Yes'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text(
+                    'No',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+        return shouldPop!;
+      },
     );
   }
 }

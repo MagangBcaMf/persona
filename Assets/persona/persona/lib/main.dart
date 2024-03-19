@@ -28,12 +28,12 @@ void main() async{
   await LocalNotifications.init();
   await Notify().initState;
   await fetchDataFromRepository();
-  final int test = await babi();
+  final int id = await checkisLogin();
   
-  runApp(MyApp(route: test));
+  runApp(MyApp(route: id));
 }
 
-Future babi() async{
+Future checkisLogin() async{
   final dbLogin = DatabaseLogin();
   int userID = await dbLogin.checkData(1);
   return userID;

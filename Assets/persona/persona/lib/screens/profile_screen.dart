@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:custom_line_indicator_bottom_navbar/custom_line_indicator_bottom_navbar.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
+import 'package:persona/model/dblogin.dart';
 import 'package:persona/repository/repository.dart';
 import 'package:persona/screens/login_screen.dart';
 
@@ -16,6 +17,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final LoginRepository loginRepository = LoginRepository();
+  List<Map<String, dynamic>> rows = [];
+  final dbLogin = DatabaseLogin();
+  
+
 
   void logout() async {
     await loginRepository.logout();
@@ -25,6 +30,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context,
       MaterialPageRoute(builder: (context) => LoginScreen()),
     );
+  }
+
+  void initState(){
+    super.initState();
+    cekData();
+  }
+
+  void cekData() async{
+    rows = await dbLogin.queryAllRows();
   }
 
   @override
@@ -66,42 +80,88 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         random: true,
                       ),
                       SizedBox(width: 17),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 38),
-                          Text(
-                            "${LoginRepository.username}",
-                            style: GoogleFonts.montserrat(
-                              fontSize: 22,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 7,
-                          ),
-                          Text(
-                            'Manager',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 22,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 7,
-                          ),
-                          Text(
-                            "${LoginRepository.nik}",
-                            style: GoogleFonts.montserrat(
-                              fontSize: 22,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
+                      FutureBuilder(
+                        future: dbLogin.queryRowById(1), 
+                        builder: ((context, snapshot) {
+                          if(snapshot.hasData){
+                            rows = snapshot.data!;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 38),
+                                Text(
+                                  "${rows[0]['name']}",
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 22,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 7,
+                                ),
+                                Text(
+                                  'Manager',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 22,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 7,
+                                ),
+                                Text(
+                                  "${rows[0]['nik']}",
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 22,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            );
+                          
+                          }
+                          return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 38),
+                                Text(
+                                  "${LoginRepository.username}",
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 22,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 7,
+                                ),
+                                Text(
+                                  'Manager',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 22,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 7,
+                                ),
+                                Text(
+                                  "${LoginRepository.nik}",
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 22,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            );
+                          
+                        })
+                      )
                     ],
                   ),
                 ),

@@ -31,7 +31,7 @@ class Event {
 }
 
 class Repository {
-  static const String baseUrl = 'http://10.10.6.47/api_pesona/api.php';
+  static const String baseUrl = 'http://10.10.6.40/api_pesona/api.php';
   static Future<Map<DateTime, List<Event>>> fetchEvents() async {
     // listenToNotifications(){
     //   print("Listening to notification");
@@ -238,6 +238,8 @@ class LoginRepository {
       await dbLogin.update({
         'id':1,
         'id_user': id_user,
+        'name' : username,
+        'nik' : nik,
       });
 
       print(await dbLogin.queryAllRows());

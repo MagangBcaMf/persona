@@ -36,7 +36,7 @@ class _NotifiState extends State<Notifi> {
 
         switch (index) {
           case 0:
-            Navigator.pushNamed(context, '/');
+            Navigator.pushNamed(context, '/home');
             break;
           case 1:
             Navigator.pushNamed(context, '/reminder');
